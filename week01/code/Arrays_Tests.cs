@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 public class MultiplesOfTests
 {
     [TestMethod]
-    public void TestMultiplesOf_Whole()
+     public void TestMultiplesOf_Whole()
     {
         double[] multiples = Arrays.MultiplesOf(7, 5);
         CollectionAssert.AreEqual(new double[] { 7, 14, 21, 28, 35 }, multiples);
