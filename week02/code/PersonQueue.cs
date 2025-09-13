@@ -13,12 +13,14 @@ public class PersonQueue
     /// <param name="person">The person to add</param>
     public void Enqueue(Person person)
     {
-        _queue.Insert(0, person);
+        //change -queue.Insert(0,person) by -queue.Add(person)
+        //causing LIFO behavior instead of FIFO
+        _queue.Add(person); // Add to the END of the list (correct for FIFO)
     }
 
     public Person Dequeue()
     {
-        var person = _queue[0];
+        var person = _queue[0]; // Take from the BEGINNING of the list (correct for FIFO)
         _queue.RemoveAt(0);
         return person;
     }
