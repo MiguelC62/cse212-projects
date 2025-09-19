@@ -21,8 +21,24 @@ public static class SetsAndMaps
     /// <param name="words">An array of 2-character words (lowercase, no duplicates)</param>
     public static string[] FindPairs(string[] words)
     {
-        // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        var set = new HashSet<string>(words);
+        var result = new List<string>();
+
+        foreach (var word in words)
+        {
+            if (word[0] == word[1]) continue; // skip identical letters
+
+            string reversed = new string(new[] { word[1], word[0] });
+
+            // Only add if the reversed exists and we haven't processed it yet
+            // Ensure natural ordering to avoid duplicates
+            if (set.Contains(reversed) && word[0] < word[1])
+            {
+                result.Add($"{reversed} & {word}");
+            }
+        }
+
+        return result.ToArray();
     }
 
     /// <summary>
@@ -41,8 +57,16 @@ public static class SetsAndMaps
         var degrees = new Dictionary<string, int>();
         foreach (var line in File.ReadLines(filename))
         {
-            var fields = line.Split(",");
-            // TODO Problem 2 - ADD YOUR CODE HERE
+            var fields = line.Split(',');
+            if (fields.Length >= 4)
+            {
+                string degree = fields[3].Trim();
+
+                if (degrees.ContainsKey(degree))
+                    degrees[degree]++;
+                else
+                    degrees[degree] = 1;
+            }
         }
 
         return degrees;
@@ -66,8 +90,35 @@ public static class SetsAndMaps
     /// </summary>
     public static bool IsAnagram(string word1, string word2)
     {
-        // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        var counts = new Dictionary<char, int>();
+
+        // Count letters in word1
+        for (int i = 0; i < word1.Length; i++)
+        {
+            char c = char.ToLower(word1[i]);
+            if (char.IsWhiteSpace(c)) continue;
+            counts[c] = counts.GetValueOrDefault(c) + 1;
+        }
+
+        // Subtract letters from word2
+        for (int i = 0; i < word2.Length; i++)
+        {
+            char c = char.ToLower(word2[i]);
+            if (char.IsWhiteSpace(c)) continue;
+
+            if (!counts.ContainsKey(c)) return false;
+
+            counts[c]--;
+            if (counts[c] < 0) return false;
+        }
+
+        // Ensure all counts are zero
+        foreach (var kv in counts)
+        {
+            if (kv.Value != 0) return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -96,11 +147,49 @@ public static class SetsAndMaps
 
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
 
+        // Deserialize JSON into our custom FeatureCollection object
+
+
+        if (featureCollection?.features == null || featureCollection.features.Length == 0)
+            return Array.Empty<string>();
+
+        // Build formatted strings for each earthquake with valid place and magnitude
+        var results = featureCollection.features
+            .Where(f => f.properties != null && !string.IsNullOrEmpty(f.properties.place) && f.properties.mag.HasValue)
+            .Select(f => $"{f.properties.place} - Mag {f.properties.mag.Value}")
+            .ToArray();
+
+        return results;
+
         // TODO Problem 5:
         // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
         // 3. Return an array of these string descriptions.
-        return [];
+       
+    }
+    /// <summary>
+    /// Root object representing the JSON returned by USGS.
+    /// </summary>
+    public class FeatureCollection
+    {
+        public Feature[] features { get; set; }
+    }
+
+    /// <summary>
+    /// Represents each earthquake entry in the JSON data.
+    /// </summary>
+    public class Feature
+    {
+        public Properties properties { get; set; }
+    }
+
+    /// <summary>
+    /// Contains the relevant properties of an earthquake: location and magnitude.
+    /// </summary>
+    public class Properties
+    {
+        public string place { get; set; }
+        public double? mag { get; set; }
     }
 }
